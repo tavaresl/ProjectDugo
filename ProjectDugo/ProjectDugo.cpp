@@ -27,6 +27,16 @@ public:
         nNeighboursForCreation = 2;
     }
 
+    void ChangeNumberNeighborToMinimumDeath()
+    {
+        nNeighboursForMinimumDeath = 2;
+    }
+
+    void ChangeNumberNeighborToMaximumDeath()
+    {
+        nNeighboursForMaximumDeath = 3;
+    }
+
     void ChangeNumbersToOriginal()
     {
         nNeighboursForMinimumDeath = 1;
@@ -51,10 +61,7 @@ public:
         memset(m_output, 0, ScreenWidth() * ScreenHeight() * sizeof(int));
         memset(m_state, 0, ScreenWidth() * ScreenHeight() * sizeof(int));
 
-        for (int x = 1; x < ScreenWidth() - 1; x++)
-            for (int y = 1; y < ScreenHeight() - 1; y++)
-                if(IsInLifeArea(x,y,lifeArea))
-                    m_state[y * ScreenWidth() + x] = rand() % 2;
+        SetInitialData();
 
         return true;
     }
@@ -81,7 +88,7 @@ public:
                     cell(x - 1, y + 1) + cell(x, y + 1) + cell(x + 1, y + 1);
 
                 if (cell(x, y) == 1)
-                    m_state[y * ScreenWidth() + x] = nNeighbours == 2 || nNeighbours == 3;
+                    m_state[y * ScreenWidth() + x] = (nNeighbours > gamedata.GetNumberMinNeighbours() && nNeighbours < gamedata.GetNumberMaxNeighbours()); // nNeighbours == 2 || nNeighbours == 3
                 else
                     m_state[y * ScreenWidth() + x] = nNeighbours == gamedata.GetNumberNeighboursToCreateLife();
 
@@ -114,7 +121,19 @@ private:
     {
         if (m_keys[VK_NUMPAD0].bHeld) gamedata.ChangeNumbersToOriginal();
         if (m_keys[VK_NUMPAD1].bHeld) gamedata.ChangeNumberNeighborToCreateLife();
+        if (m_keys[VK_NUMPAD2].bHeld) gamedata.ChangeNumberNeighborToMinimumDeath();
+        if (m_keys[VK_NUMPAD3].bHeld) gamedata.ChangeNumberNeighborToMaximumDeath();
+        if (m_keys[VK_NUMPAD9].bHeld) SetInitialData();
         //if (m_keys[VK_NUMPAD2].bHeld) gamedata.ChangeNumberNeighborToCreateLife();
+    }
+
+    void SetInitialData()
+    {
+        for (int x = 1; x < ScreenWidth() - 1; x++)
+            for (int y = 1; y < ScreenHeight() - 1; y++)
+                if (IsInLifeArea(x, y, lifeArea))
+                    m_state[y * ScreenWidth() + x] = rand() % 2;
+
     }
 };
 
