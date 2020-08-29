@@ -7,6 +7,7 @@ private:
     int nNeighboursForMinimumDeath = 1;
     int nNeighboursForMaximumDeath = 4;
     int nNeighboursForCreation = 3;
+    int nNeighboursDistance = 1;
 
 public:
     int GetNumberMinNeighbours()
@@ -20,6 +21,10 @@ public:
     int GetNumberNeighboursToCreateLife()
     {
         return nNeighboursForCreation;
+    }
+    int GetNumberNeighbourDistance()
+    {
+        return nNeighboursDistance;
     }
 
     void ChangeNumberNeighborToCreateLife()
@@ -37,11 +42,17 @@ public:
         nNeighboursForMaximumDeath = 3;
     }
 
+    void ChangeNumberNeighborDistance()
+    {
+        nNeighboursDistance = 2;
+    }
+
     void ChangeNumbersToOriginal()
     {
         nNeighboursForMinimumDeath = 1;
         nNeighboursForMaximumDeath = 4;
         nNeighboursForCreation = 3;
+        nNeighboursDistance = 1;
     }
 
 };
@@ -80,15 +91,13 @@ public:
         for (int i = 0; i < ScreenWidth() * ScreenHeight(); i++)
             m_output[i] = m_state[i];
 
-        for (int x = 1; x < ScreenWidth() - 1; x++)
-            for (int y = 1; y < ScreenHeight() - 1; y++)
+        for (int x = gamedata.GetNumberNeighbourDistance(); x < ScreenWidth() - gamedata.GetNumberNeighbourDistance(); x++)
+            for (int y = gamedata.GetNumberNeighbourDistance(); y < ScreenHeight() - gamedata.GetNumberNeighbourDistance(); y++)
             {
-                int nNeighbours = cell(x - 1, y - 1) + cell(x, y - 1) + cell(x + 1, y - 1) +
-                    cell(x - 1, y) + 0 + cell(x + 1, y) +
-                    cell(x - 1, y + 1) + cell(x, y + 1) + cell(x + 1, y + 1);
+                int nNeighbours = GetNumberOfNeighboursActive(x, y);
 
                 if (cell(x, y) == 1)
-                    m_state[y * ScreenWidth() + x] = (nNeighbours > gamedata.GetNumberMinNeighbours() && nNeighbours < gamedata.GetNumberMaxNeighbours()); // nNeighbours == 2 || nNeighbours == 3
+                    m_state[y * ScreenWidth() + x] = (nNeighbours > gamedata.GetNumberMinNeighbours() && nNeighbours < gamedata.GetNumberMaxNeighbours());
                 else
                     m_state[y * ScreenWidth() + x] = nNeighbours == gamedata.GetNumberNeighboursToCreateLife();
 
@@ -123,6 +132,7 @@ private:
         if (m_keys[VK_NUMPAD1].bHeld) gamedata.ChangeNumberNeighborToCreateLife();
         if (m_keys[VK_NUMPAD2].bHeld) gamedata.ChangeNumberNeighborToMinimumDeath();
         if (m_keys[VK_NUMPAD3].bHeld) gamedata.ChangeNumberNeighborToMaximumDeath();
+        if (m_keys[VK_NUMPAD4].bHeld) gamedata.ChangeNumberNeighborDistance();
         if (m_keys[VK_NUMPAD9].bHeld) SetInitialData();
         //if (m_keys[VK_NUMPAD2].bHeld) gamedata.ChangeNumberNeighborToCreateLife();
     }
@@ -134,6 +144,23 @@ private:
                 if (IsInLifeArea(x, y, lifeArea))
                     m_state[y * ScreenWidth() + x] = rand() % 2;
 
+    }
+
+    int GetNumberOfNeighboursActive(int _x, int _y)
+    {
+        auto cell = [&](int x, int y)
+        {
+            return m_output[y * ScreenWidth() + x];
+        };
+
+        int cellCount = 0;
+
+        for (int x = -gamedata.GetNumberNeighbourDistance(); x <= gamedata.GetNumberNeighbourDistance(); x++)
+            for (int y = -gamedata.GetNumberNeighbourDistance(); y <= gamedata.GetNumberNeighbourDistance(); y++)
+                if(x!=0 || y!=0)
+                   cellCount += cell(_x - x, _y - y);
+
+        return cellCount;
     }
 };
 
