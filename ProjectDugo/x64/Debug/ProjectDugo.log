@@ -1,5 +1,5 @@
 ﻿  ProjectDugo.cpp
-C:\Users\Fanatee\source\repos\ProjectDugo\ProjectDugo\olcConsoleGameEngine.h(767,1): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\Fanatee\source\repos\ProjectDugo\ProjectDugo\olcConsoleGameEngine.h(1107,1): warning C4267: 'return': conversion from 'size_t' to 'unsigned int', possible loss of data
-C:\Users\Fanatee\source\repos\ProjectDugo\ProjectDugo\olcConsoleGameEngine.h(1204,1): warning C4312: 'type cast': conversion from 'DWORD' to 'olcConsoleGameEngine *' of greater size
-  ProjectDugo.vcxproj -> C:\Users\Fanatee\source\repos\ProjectDugo\x64\Debug\ProjectDugo.exe
+C:\Users\falme\Documents\Projects\ProjectDugo\ProjectDugo\olcConsoleGameEngine.h(767,1): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\falme\Documents\Projects\ProjectDugo\ProjectDugo\olcConsoleGameEngine.h(1107,1): warning C4267: 'return': conversão de 'size_t' para 'unsigned int', possível perda de dados
+C:\Users\falme\Documents\Projects\ProjectDugo\ProjectDugo\olcConsoleGameEngine.h(1204,1): warning C4312: 'conversão de tipo': conversão de 'DWORD' para 'olcConsoleGameEngine *' de tamanho maior
+  ProjectDugo.vcxproj -> C:\Users\falme\Documents\Projects\ProjectDugo\x64\Debug\ProjectDugo.exe
