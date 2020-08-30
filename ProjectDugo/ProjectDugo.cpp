@@ -1,13 +1,23 @@
 #include <stdio.h>
 #include "olcConsoleGameEngine.h"
 
+class NeighboursData
+{
+public:
+    int left = 1;
+    int right = 1;
+    int up = 1;
+    int down = 1;
+
+};
+
 class GameData
 {
 private:
     int nNeighboursForMinimumDeath = 1;
     int nNeighboursForMaximumDeath = 4;
     int nNeighboursForCreation = 3;
-    int nNeighboursDistance = 1;
+    NeighboursData neighboursDistance;
 
 public:
     int GetNumberMinNeighbours()
@@ -22,9 +32,9 @@ public:
     {
         return nNeighboursForCreation;
     }
-    int GetNumberNeighbourDistance()
+    NeighboursData GetNumberNeighbourDistance()
     {
-        return nNeighboursDistance;
+        return neighboursDistance;
     }
 
     void ChangeNumberNeighborToCreateLife()
@@ -44,15 +54,56 @@ public:
 
     void ChangeNumberNeighborDistance()
     {
-        nNeighboursDistance = 2;
+        neighboursDistance.left = 2;
+        neighboursDistance.right = 2;
+        neighboursDistance.up = 2;
+        neighboursDistance.down = 2;
     }
+
+    //Directions 
+
+    void ChangeDirectionToUp()
+    {
+        ResetNeighboursDistance();
+        neighboursDistance.down = 0;
+    }
+
+    void ChangeDirectionToDown()
+    {
+        ResetNeighboursDistance();
+        neighboursDistance.up = 0;
+
+    }
+
+    void ChangeDirectionToLeft()
+    {
+        ResetNeighboursDistance(); 
+        neighboursDistance.right = 0;
+
+    }
+
+    void ChangeDirectionToRight()
+    {
+        ResetNeighboursDistance();
+        neighboursDistance.left = 0;
+    }
+
+    void ResetNeighboursDistance()
+    {
+        neighboursDistance.left = 1;
+        neighboursDistance.right = 1;
+        neighboursDistance.up = 1;
+        neighboursDistance.down = 1;
+    }
+
+    //Reset
 
     void ChangeNumbersToOriginal()
     {
         nNeighboursForMinimumDeath = 1;
         nNeighboursForMaximumDeath = 4;
         nNeighboursForCreation = 3;
-        nNeighboursDistance = 1;
+        ResetNeighboursDistance();
     }
 
 };
@@ -91,8 +142,8 @@ public:
         for (int i = 0; i < ScreenWidth() * ScreenHeight(); i++)
             m_output[i] = m_state[i];
 
-        for (int x = gamedata.GetNumberNeighbourDistance(); x < ScreenWidth() - gamedata.GetNumberNeighbourDistance(); x++)
-            for (int y = gamedata.GetNumberNeighbourDistance(); y < ScreenHeight() - gamedata.GetNumberNeighbourDistance(); y++)
+        for (int x = gamedata.GetNumberNeighbourDistance().left; x < ScreenWidth() - gamedata.GetNumberNeighbourDistance().right; x++)
+            for (int y = gamedata.GetNumberNeighbourDistance().up; y < ScreenHeight() - gamedata.GetNumberNeighbourDistance().down; y++)
             {
                 int nNeighbours = GetNumberOfNeighboursActive(x, y);
 
@@ -105,6 +156,9 @@ public:
                 else Draw(x, y, PIXEL_SOLID, FG_BLACK);
 
             }
+
+
+        DrawString(0, 0, L"Game Of Life");
 
 
         return true;
@@ -128,13 +182,18 @@ private:
 
     void CheckInputForGameState()
     {
-        if (m_keys[VK_NUMPAD0].bHeld) gamedata.ChangeNumbersToOriginal();
-        if (m_keys[VK_NUMPAD1].bHeld) gamedata.ChangeNumberNeighborToCreateLife();
-        if (m_keys[VK_NUMPAD2].bHeld) gamedata.ChangeNumberNeighborToMinimumDeath();
-        if (m_keys[VK_NUMPAD3].bHeld) gamedata.ChangeNumberNeighborToMaximumDeath();
-        if (m_keys[VK_NUMPAD4].bHeld) gamedata.ChangeNumberNeighborDistance();
-        if (m_keys[VK_NUMPAD9].bHeld) SetInitialData();
-        //if (m_keys[VK_NUMPAD2].bHeld) gamedata.ChangeNumberNeighborToCreateLife();
+        if (/*S*/ m_keys[0x53].bHeld) gamedata.ChangeNumbersToOriginal();
+        if (/*Q*/ m_keys[0x51].bHeld) gamedata.ChangeNumberNeighborToCreateLife();
+        if (/*E*/ m_keys[0x45].bHeld) gamedata.ChangeNumberNeighborToMinimumDeath();
+        if (/*Z*/ m_keys[0x5A].bHeld) gamedata.ChangeNumberNeighborToMaximumDeath();
+        if (/*C*/ m_keys[0x43].bHeld) gamedata.ChangeNumberNeighborDistance();
+
+        if (/*W*/ m_keys[0x57].bHeld) gamedata.ChangeDirectionToUp();
+        if (/*A*/ m_keys[0x41].bHeld) gamedata.ChangeDirectionToLeft();
+        if (/*D*/ m_keys[0x44].bHeld) gamedata.ChangeDirectionToRight();
+        if (/*X*/ m_keys[0x58].bHeld) gamedata.ChangeDirectionToDown();
+
+        if (m_keys[VK_SPACE].bHeld) SetInitialData();
     }
 
     void SetInitialData()
@@ -155,10 +214,11 @@ private:
 
         int cellCount = 0;
 
-        for (int x = -gamedata.GetNumberNeighbourDistance(); x <= gamedata.GetNumberNeighbourDistance(); x++)
-            for (int y = -gamedata.GetNumberNeighbourDistance(); y <= gamedata.GetNumberNeighbourDistance(); y++)
+        for (int x = -gamedata.GetNumberNeighbourDistance().left; x <= gamedata.GetNumberNeighbourDistance().right; x++)
+            for (int y = -gamedata.GetNumberNeighbourDistance().up; y <= gamedata.GetNumberNeighbourDistance().down; y++)
                 if(x!=0 || y!=0)
                    cellCount += cell(_x - x, _y - y);
+
 
         return cellCount;
     }
