@@ -17,6 +17,7 @@ private:
     int nNeighboursForMinimumDeath = 1;
     int nNeighboursForMaximumDeath = 4;
     int nNeighboursForCreation = 3;
+    int areaOfDebugWindow = 16;
     NeighboursData neighboursDistance;
 
 public:
@@ -32,6 +33,12 @@ public:
     {
         return nNeighboursForCreation;
     }
+
+    int GetNumberOfDabugArea()
+    {
+        return areaOfDebugWindow;
+    }
+
     NeighboursData GetNumberNeighbourDistance()
     {
         return neighboursDistance;
@@ -142,7 +149,7 @@ public:
         for (int i = 0; i < ScreenWidth() * ScreenHeight(); i++)
             m_output[i] = m_state[i];
 
-        for (int x = gamedata.GetNumberNeighbourDistance().left; x < ScreenWidth() - gamedata.GetNumberNeighbourDistance().right; x++)
+        for (int x = gamedata.GetNumberNeighbourDistance().left; x < ScreenWidth() - gamedata.GetNumberNeighbourDistance().right - gamedata.GetNumberOfDabugArea(); x++)
             for (int y = gamedata.GetNumberNeighbourDistance().up; y < ScreenHeight() - gamedata.GetNumberNeighbourDistance().down; y++)
             {
                 int nNeighbours = GetNumberOfNeighboursActive(x, y);
@@ -157,6 +164,8 @@ public:
 
             }
 
+        DrawGameBorders();
+        DrawDebugBorders();
 
         DrawString(0, 0, L"Game Of Life");
 
@@ -221,6 +230,35 @@ private:
 
 
         return cellCount;
+    }
+
+    void DrawGameBorders()
+    {
+        for (int x = 0; x < ScreenWidth() - gamedata.GetNumberOfDabugArea(); x++)
+        {
+            Draw(x, 0, PIXEL_THREEQUARTERS, FG_WHITE);
+            Draw(x, ScreenHeight() - 1, PIXEL_THREEQUARTERS, FG_WHITE);
+        }
+
+        for (int y = 0; y < ScreenHeight(); y++) {
+            Draw(0, y, PIXEL_THREEQUARTERS, FG_WHITE);
+            Draw(ScreenWidth()- gamedata.GetNumberOfDabugArea() -1, y, PIXEL_THREEQUARTERS, FG_WHITE);
+        }
+    }
+
+
+    void DrawDebugBorders()
+    {
+        for (int x = ScreenWidth() - gamedata.GetNumberOfDabugArea(); x < ScreenWidth(); x++)
+        {
+            Draw(x, 0, PIXEL_THREEQUARTERS, FG_CYAN);
+            Draw(x, ScreenHeight() - 1, PIXEL_THREEQUARTERS, FG_CYAN);
+        }
+
+        for (int y = 0; y < ScreenHeight(); y++) {
+            Draw(ScreenWidth()-1, y, PIXEL_THREEQUARTERS, FG_CYAN);
+            Draw(ScreenWidth() - gamedata.GetNumberOfDabugArea(), y, PIXEL_THREEQUARTERS, FG_CYAN);
+        }
     }
 };
 
