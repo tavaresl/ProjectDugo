@@ -133,6 +133,9 @@ public:
 
         SetInitialData();
 
+        DrawDebugBorders();
+        DrawGameTexts();
+
         return true;
     }
 
@@ -166,8 +169,7 @@ public:
             }
 
         DrawGameBorders();
-        DrawDebugBorders();
-        DrawGameTexts();
+        DrawGameStats();
 
 
         return true;
@@ -252,6 +254,7 @@ private:
         for (int x = GetDiffScreenWidth() - gamedata.GetNumberOfDabugArea(); x < GetDiffScreenWidth(); x++)
         {
             FillRect(GetDiffPos(x), 0, 8, 8, olc::CYAN);
+            FillRect(GetDiffPos(x), GetDiffPos(43), 8, 8, olc::CYAN);
             FillRect(GetDiffPos(x), GetDiffPos(GetDiffScreenHeight() - 1), 8, 8, olc::CYAN);
         }
 
@@ -264,7 +267,7 @@ private:
     void DrawGameTexts()
     {
         
-
+        //Titles
         DrawString(
             GetDiffPos(1),
             GetDiffPos(0),
@@ -274,6 +277,8 @@ private:
             GetDiffPos(GetDiffScreenWidth() - gamedata.GetNumberOfDabugArea() + 4),
             GetDiffPos(0),
             "COMMANDS", olc::BLACK);
+
+        //Commands
 
         DrawDebugText(2, 2, "> SPACE <");
         DrawDebugText(1, 3, "Create Life");
@@ -306,6 +311,34 @@ private:
 
         DrawDebugText(2, 40, "> S <");
         DrawDebugText(1, 41, "Reset Stats");
+
+
+    }
+
+    void DrawGameStats()
+    {
+        FillRect(
+            GetDiffPos(GetDiffScreenWidth()-gamedata.GetNumberOfDabugArea()+1), 
+            GetDiffPos(46), 
+            8* (gamedata.GetNumberOfDabugArea()-2), 
+            8 * 10, 
+            olc::BLACK);
+
+        //Status
+
+        DrawDebugText(1, 46, "N to Create : " + std::to_string(gamedata.GetNumberNeighboursToCreateLife()));
+        DrawDebugText(1, 48, "MinNeighbour : " + std::to_string(gamedata.GetNumberMinNeighbours()));
+        DrawDebugText(1, 50, "MaxNeighbour : " + std::to_string(gamedata.GetNumberMaxNeighbours()));
+        DrawDebugText(1, 52, "Distance : " + std::to_string(gamedata.GetNumberNeighbourDistance().right));
+
+        std::string direction = "";
+
+        if (gamedata.GetNumberNeighbourDistance().up == 0) direction = "S";
+        else if (gamedata.GetNumberNeighbourDistance().down == 0) direction = "N";
+        else if (gamedata.GetNumberNeighbourDistance().left == 0) direction = "E";
+        else if (gamedata.GetNumberNeighbourDistance().right == 0) direction = "W";
+
+        DrawDebugText(1, 54, "Direction : " + direction);
     }
 
     void DrawDebugText(int x, int y, std::string text)
