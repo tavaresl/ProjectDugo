@@ -276,10 +276,10 @@ private:
             "COMMANDS", olc::BLACK);
 
         DrawDebugText(2, 2, "> SPACE <");
-        DrawDebugText(2, 3, "Create Life");
+        DrawDebugText(1, 3, "Create Life");
 
         DrawDebugText(2, 6, "> Q <");
-        DrawDebugText(2, 7, "Less Deaths");
+        DrawDebugText(1, 7, "Less Deaths");
 
         DrawDebugText(2, 10, "> E <");
         DrawDebugText(1, 11, "Change Minimum");
