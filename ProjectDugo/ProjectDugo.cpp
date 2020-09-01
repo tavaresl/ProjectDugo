@@ -215,7 +215,10 @@ public:
                     else
                         FillRect(GetDiffPos(x), GetDiffPos(y), SCALE, SCALE, olc::WHITE);
                 }
-                else FillRect(GetDiffPos(x), GetDiffPos(y), SCALE, SCALE, olc::BLACK);
+                else
+                {
+                    FillRect(GetDiffPos(x), GetDiffPos(y), SCALE, SCALE, olc::BLACK);
+                }
 
             }
 
