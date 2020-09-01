@@ -171,7 +171,7 @@ public:
 
         m_output = new int[GetDiffScreenWidth() * GetDiffScreenHeight()];
         m_state = new int[GetDiffScreenWidth() * GetDiffScreenHeight()];
-        safeHeaven = new SafeHeaven(SCALE, SCALE, SCALE * 7, SCALE * 7, olc::GREEN);
+        safeHeaven = new SafeHeaven(SCALE, SCALE, SCALE * 32, SCALE * 32, olc::GREEN);
 
         memset(m_output, 0, GetDiffScreenWidth() * GetDiffScreenHeight() * sizeof(int));
         memset(m_state, 0, GetDiffScreenWidth() * GetDiffScreenHeight() * sizeof(int));
@@ -189,6 +189,8 @@ public:
         CheckInputForGameState();
 
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        bool isAnyCellOutsideSafeHeaven = false;
+        bool isAnyCellAlive = false;
 
         auto cellAt = [&](int x, int y)
         {
@@ -210,10 +212,17 @@ public:
 
                 if (cellAt(x, y) == IS_ALIVE)
                 {
+                    isAnyCellAlive = true;
+
                     if (safeHeaven->Contains(GetDiffPos(x), GetDiffPos(y)))
+                    {
                         FillRect(GetDiffPos(x), GetDiffPos(y), SCALE, SCALE, olc::CYAN);
+                    }
                     else
+                    {
+                        isAnyCellOutsideSafeHeaven = true;
                         FillRect(GetDiffPos(x), GetDiffPos(y), SCALE, SCALE, olc::WHITE);
+                    }
                 }
                 else
                 {
@@ -225,6 +234,14 @@ public:
         DrawSafeHeaven();
         DrawGameBorders();
         DrawGameStats();
+
+        if (isAnyCellAlive && !isAnyCellOutsideSafeHeaven)
+        {
+            DrawString(
+                GetDiffPos(10),
+                GetDiffPos(10),
+                "Deu bom");
+        }
 
         return true;
     }
