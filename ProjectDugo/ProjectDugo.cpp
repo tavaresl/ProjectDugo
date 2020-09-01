@@ -2,6 +2,10 @@
 #define OLC_PGE_APPLICATION
 #include "olcConsoleGameEngine.h"
 
+const int SCREEN_WIDTH = 80;
+const int SCREEN_HEIGHT = 60;
+const int SCALE = 8;
+
 class NeighboursData
 {
 public:
@@ -9,17 +13,16 @@ public:
     int right = 1;
     int up = 1;
     int down = 1;
-
 };
 
 class GameData
 {
 private:
+    NeighboursData neighboursDistance;
     int nNeighboursForMinimumDeath = 1;
     int nNeighboursForMaximumDeath = 4;
     int nNeighboursForCreation = 3;
     int areaOfDebugWindow = 18;
-    NeighboursData neighboursDistance;
 
 public:
     int GetNumberMinNeighbours()
@@ -116,6 +119,46 @@ public:
 
 };
 
+class SafeHeaven
+{
+private:
+    int x;
+    int y;
+    int w;
+    int h;
+    olc::Pixel color;
+
+public:
+    SafeHeaven()
+    {
+        x = 0;
+        y = 0;
+        w = 0;
+        h = 0;
+        color = olc::GREEN;
+    }
+
+    SafeHeaven(int _x, int _y, int _w, int _h, olc::Pixel _color)
+    {
+        x = _x;
+        y = _y;
+        w = _w;
+        h = _h;
+        color = _color;
+    }
+
+    int GetX() { return x; }
+    int GetY() { return y; }
+    int GetW() { return w; }
+    int GetH() { return h; }
+    olc::Pixel GetColor() { return color; }
+
+    bool Contains(int _x, int _y)
+    {
+        return _x >= x && _x <= w && _y >= y && _y <= h;
+    }
+};
+
 class ProjectDugo_Game : public olc::PixelGameEngine {
 public:
     ProjectDugo_Game(int _lifeArea)
@@ -128,6 +171,8 @@ public:
 
         m_output = new int[GetDiffScreenWidth() * GetDiffScreenHeight()];
         m_state = new int[GetDiffScreenWidth() * GetDiffScreenHeight()];
+        safeHeaven = new SafeHeaven(SCALE, SCALE, SCALE * 7, SCALE * 7, olc::GREEN);
+
         memset(m_output, 0, GetDiffScreenWidth() * GetDiffScreenHeight() * sizeof(int));
         memset(m_state, 0, GetDiffScreenWidth() * GetDiffScreenHeight() * sizeof(int));
 
@@ -145,7 +190,7 @@ public:
 
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-        auto cell = [&](int x, int y)
+        auto cellAt = [&](int x, int y)
         {
             return m_output[y * GetDiffScreenWidth() + x];
         };
@@ -158,24 +203,42 @@ public:
             {
                 int nNeighbours = GetNumberOfNeighboursActive(x, y);
 
-                if (cell(x, y) == 1)
+                if (cellAt(x, y) == IS_ALIVE)
                     m_state[y * GetDiffScreenWidth() + x] = (nNeighbours > gamedata.GetNumberMinNeighbours() && nNeighbours < gamedata.GetNumberMaxNeighbours());
                 else
                     m_state[y * GetDiffScreenWidth() + x] = nNeighbours == gamedata.GetNumberNeighboursToCreateLife();
 
-                if (cell(x, y) == 1) FillRect(GetDiffPos(x), GetDiffPos(y), 8,8,olc::WHITE);
-                else FillRect(GetDiffPos(x), GetDiffPos(y), 8, 8, olc::BLACK);
+                if (cellAt(x, y) == IS_ALIVE)
+                {
+                    if (safeHeaven->Contains(GetDiffPos(x), GetDiffPos(y)))
+                        FillRect(GetDiffPos(x), GetDiffPos(y), SCALE, SCALE, olc::CYAN);
+                    else
+                        FillRect(GetDiffPos(x), GetDiffPos(y), SCALE, SCALE, olc::WHITE);
+                }
+                else FillRect(GetDiffPos(x), GetDiffPos(y), SCALE, SCALE, olc::BLACK);
 
             }
 
+        DrawSafeHeaven();
         DrawGameBorders();
         DrawGameStats();
 
-
         return true;
+    }
+    void DrawSafeHeaven()
+    {
+        DrawRect(
+            safeHeaven->GetX(),
+            safeHeaven->GetY(),
+            safeHeaven->GetW(),
+            safeHeaven->GetH(),
+            safeHeaven->GetColor()
+        );
     }
 private:
     GameData gamedata;
+    SafeHeaven* safeHeaven;
+    const int IS_ALIVE = 1;
 
     int* m_output;
     int* m_state;
@@ -238,13 +301,14 @@ private:
     {
         for (int x = 0; x < GetDiffScreenWidth() - gamedata.GetNumberOfDabugArea(); x++)
         {
-            FillRect(GetDiffPos(x), 0, 8,8, olc::WHITE);
-            FillRect(GetDiffPos(x), GetDiffPos(GetDiffScreenHeight() - 1), 8, 8, olc::WHITE);
+            FillRect(GetDiffPos(x), 0, SCALE, SCALE, olc::WHITE);
+            FillRect(GetDiffPos(x), GetDiffPos(GetDiffScreenHeight() - 1), SCALE, SCALE, olc::WHITE);
         }
 
-        for (int y = 0; y < GetDiffScreenHeight(); y++) {
-            FillRect(0, GetDiffPos(y), 8, 8, olc::WHITE);
-            FillRect(GetDiffPos(GetDiffScreenWidth() - gamedata.GetNumberOfDabugArea() -1), GetDiffPos(y), 8, 8, olc::WHITE);
+        for (int y = 0; y < GetDiffScreenHeight(); y++)
+        {
+            FillRect(0, GetDiffPos(y), SCALE, SCALE, olc::WHITE);
+            FillRect(GetDiffPos(GetDiffScreenWidth() - gamedata.GetNumberOfDabugArea() -1), GetDiffPos(y), SCALE, SCALE, olc::WHITE);
         }
     }
 
@@ -253,14 +317,14 @@ private:
     {
         for (int x = GetDiffScreenWidth() - gamedata.GetNumberOfDabugArea(); x < GetDiffScreenWidth(); x++)
         {
-            FillRect(GetDiffPos(x), 0, 8, 8, olc::CYAN);
-            FillRect(GetDiffPos(x), GetDiffPos(43), 8, 8, olc::CYAN);
-            FillRect(GetDiffPos(x), GetDiffPos(GetDiffScreenHeight() - 1), 8, 8, olc::CYAN);
+            FillRect(GetDiffPos(x), 0, SCALE, SCALE , olc::CYAN);
+            FillRect(GetDiffPos(x), GetDiffPos(43), SCALE, SCALE, olc::CYAN);
+            FillRect(GetDiffPos(x), GetDiffPos(GetDiffScreenHeight() - 1), SCALE, SCALE, olc::CYAN);
         }
 
         for (int y = 0; y < GetDiffScreenHeight(); y++) {
-            FillRect(GetDiffPos(GetDiffScreenWidth() -1), GetDiffPos(y), 8, 8, olc::CYAN);
-            FillRect(GetDiffPos(GetDiffScreenWidth() - gamedata.GetNumberOfDabugArea()), GetDiffPos(y), 8, 8, olc::CYAN);
+            FillRect(GetDiffPos(GetDiffScreenWidth() -1), GetDiffPos(y), SCALE, SCALE, olc::CYAN);
+            FillRect(GetDiffPos(GetDiffScreenWidth() - gamedata.GetNumberOfDabugArea()), GetDiffPos(y), SCALE, SCALE, olc::CYAN);
         }
     }
 
@@ -320,8 +384,8 @@ private:
         FillRect(
             GetDiffPos(GetDiffScreenWidth()-gamedata.GetNumberOfDabugArea()+1), 
             GetDiffPos(46), 
-            8* (gamedata.GetNumberOfDabugArea()-2), 
-            8 * 10, 
+            SCALE * (gamedata.GetNumberOfDabugArea()-2), 
+            SCALE * 10, 
             olc::BLACK);
 
         //Status
@@ -351,17 +415,17 @@ private:
 
     int GetDiffScreenWidth()
     {
-        return ScreenWidth() / 8;
+        return ScreenWidth() / SCALE;
     }
 
     int GetDiffScreenHeight()
     {
-        return ScreenHeight() / 8;
+        return ScreenHeight() / SCALE;
     }
 
     int GetDiffPos(int a)
     {
-        return a * 8;
+        return a * SCALE;
     }
 };
 
@@ -369,7 +433,7 @@ int main()
 {
     ProjectDugo_Game game(15);
 
-    if(game.Construct(80*8, 60*8, 1, 1))
+    if(game.Construct(SCREEN_WIDTH * SCALE, SCREEN_HEIGHT * SCALE, 1, 1))
         game.Start();
 
     return 0;
