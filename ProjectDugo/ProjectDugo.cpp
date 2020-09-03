@@ -5,6 +5,7 @@
 #include "olcConsoleGameEngine.h"
 #include "SafeHeaven.h"
 #include "GameData.h"
+#include "Score.h"
 
 const int SCREEN_WIDTH = 80;
 const int SCREEN_HEIGHT = 60;
@@ -24,6 +25,7 @@ public:
 
         m_output = new int[GetDiffScreenWidth() * GetDiffScreenHeight()];
         m_state = new int[GetDiffScreenWidth() * GetDiffScreenHeight()];
+        score = new Score();
 
         memset(m_output, 0, GetDiffScreenWidth() * GetDiffScreenHeight() * sizeof(int));
         memset(m_state, 0, GetDiffScreenWidth() * GetDiffScreenHeight() * sizeof(int));
@@ -35,21 +37,6 @@ public:
         DrawGameTexts();
 
         return true;
-    }
-
-    void CreateSafeHeaven()
-    {
-        //SeedRandomIfFirstRun();
-
-        int safeHeavenSize = SCALE * 32;
-        int debugAreaOffset = gamedata.GetNumberOfDabugArea() * SCALE;
-        int widthOffset = safeHeavenSize + debugAreaOffset;
-        int width = ScreenWidth() - widthOffset;
-        int height = ScreenHeight() - safeHeavenSize;
-        int randomX = Rand() % width;
-        int randomY = Rand() % height;
-        
-        safeHeaven = new SafeHeaven(randomX, randomY, safeHeavenSize, safeHeavenSize, olc::GREEN);
     }
     bool OnUserUpdate(float fElapsedTime) override {
 
@@ -104,10 +91,27 @@ public:
 
         if (isAnyCellAlive && !isAnyCellOutsideSafeHeaven)
         {
+            score->IncrementCurrentScore();
+            score->UpdateHighScore();
             CreateSafeHeaven();
         }
 
         return true;
+    }
+
+    void CreateSafeHeaven()
+    {
+        //SeedRandomIfFirstRun();
+
+        int safeHeavenSize = SCALE * 32;
+        int debugAreaOffset = gamedata.GetNumberOfDabugArea() * SCALE;
+        int widthOffset = safeHeavenSize + debugAreaOffset;
+        int width = ScreenWidth() - widthOffset;
+        int height = ScreenHeight() - safeHeavenSize;
+        int randomX = Rand() % width;
+        int randomY = Rand() % height;
+        
+        safeHeaven = new SafeHeaven(randomX, randomY, safeHeavenSize, safeHeavenSize, olc::GREEN);
     }
     void DrawSafeHeaven()
     {
@@ -119,9 +123,11 @@ public:
             safeHeaven->GetColor()
         );
     }
+
 private:
     GameData gamedata;
     SafeHeaven* safeHeaven;
+    Score* score;
     const int IS_ALIVE = 1;
 
     int* m_output;
@@ -176,7 +182,6 @@ private:
             for (int y = 1; y < GetDiffScreenHeight() - 1; y++)
                 if (IsInLifeArea(x, y, lifeArea))
                     m_state[y * GetDiffScreenWidth() + x] = rand() % 2;
-
     }
 
     int GetNumberOfNeighboursActive(int _x, int _y)
@@ -290,10 +295,12 @@ private:
 
         //Status
 
-        DrawDebugText(1, 46, "N to Create : " + std::to_string(gamedata.GetNumberNeighboursToCreateLife()));
-        DrawDebugText(1, 48, "MinNeighbour : " + std::to_string(gamedata.GetNumberMinNeighbours()));
-        DrawDebugText(1, 50, "MaxNeighbour : " + std::to_string(gamedata.GetNumberMaxNeighbours()));
-        DrawDebugText(1, 52, "Distance : " + std::to_string(gamedata.GetNumberNeighbourDistance().right));
+        DrawDebugText(1, 45, "N to Create : " + std::to_string(gamedata.GetNumberNeighboursToCreateLife()));
+        DrawDebugText(1, 47, "MinNeighbour : " + std::to_string(gamedata.GetNumberMinNeighbours()));
+        DrawDebugText(1, 49, "MaxNeighbour : " + std::to_string(gamedata.GetNumberMaxNeighbours()));
+        DrawDebugText(1, 51, "Distance : " + std::to_string(gamedata.GetNumberNeighbourDistance().right));
+        DrawDebugText(1, 53, "Score : " + std::to_string(score->CurrentScore()));
+        DrawDebugText(1, 55, "Highscore : " + std::to_string(score->Highscore()));
 
         std::string direction = "";
 
@@ -302,7 +309,7 @@ private:
         else if (gamedata.GetNumberNeighbourDistance().left == 0) direction = "E";
         else if (gamedata.GetNumberNeighbourDistance().right == 0) direction = "W";
 
-        DrawDebugText(1, 54, "Direction : " + direction);
+        DrawDebugText(1, 57, "Direction : " + direction);
     }
 
     void DrawDebugText(int x, int y, std::string text)
