@@ -1,6 +1,8 @@
 #include <stdio.h>
+#include <stdlib.h>
 #define OLC_PGE_APPLICATION
 #include "olcConsoleGameEngine.h"
+#include <time.h>
 
 const int SCREEN_WIDTH = 80;
 const int SCREEN_HEIGHT = 60;
@@ -155,7 +157,7 @@ public:
 
     bool Contains(int _x, int _y)
     {
-        return _x >= x && _x <= w && _y >= y && _y <= h;
+        return _x >= x && _x <= x + w && _y >= y && _y <= y + h;
     }
 };
 
@@ -171,17 +173,41 @@ public:
 
         m_output = new int[GetDiffScreenWidth() * GetDiffScreenHeight()];
         m_state = new int[GetDiffScreenWidth() * GetDiffScreenHeight()];
-        safeHeaven = new SafeHeaven(SCALE, SCALE, SCALE * 32, SCALE * 32, olc::GREEN);
 
         memset(m_output, 0, GetDiffScreenWidth() * GetDiffScreenHeight() * sizeof(int));
         memset(m_state, 0, GetDiffScreenWidth() * GetDiffScreenHeight() * sizeof(int));
 
         SetInitialData();
 
+        CreateSafeHeaven();
         DrawDebugBorders();
         DrawGameTexts();
 
         return true;
+    }
+
+    void CreateSafeHeaven()
+    {
+        SeedRandomIfFirstRun();
+
+        int safeHeavenSize = SCALE * 32;
+        int debugAreaOffset = gamedata.GetNumberOfDabugArea() * SCALE;
+        int widthOffset = safeHeavenSize + debugAreaOffset;
+        int width = GetDiffScreenWidth() - widthOffset;
+        int height = GetDiffScreenHeight() - safeHeavenSize;
+        int randomX = rand() % width;
+        int randomY = rand() % height;
+        
+        safeHeaven = new SafeHeaven(randomX, randomY, safeHeavenSize, safeHeavenSize, olc::GREEN);
+    }
+
+    void SeedRandomIfFirstRun()
+    {
+        if (isFirstRun)
+        {
+            srand(time(NULL));
+            isFirstRun = false;
+        }
     }
 
     bool OnUserUpdate(float fElapsedTime) override {
@@ -237,10 +263,7 @@ public:
 
         if (isAnyCellAlive && !isAnyCellOutsideSafeHeaven)
         {
-            DrawString(
-                GetDiffPos(10),
-                GetDiffPos(10),
-                "Deu bom");
+            CreateSafeHeaven();
         }
 
         return true;
@@ -259,6 +282,7 @@ private:
     GameData gamedata;
     SafeHeaven* safeHeaven;
     const int IS_ALIVE = 1;
+    bool isFirstRun = true;
 
     int* m_output;
     int* m_state;
