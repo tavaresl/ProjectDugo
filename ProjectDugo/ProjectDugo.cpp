@@ -6,6 +6,7 @@
 #include "SafeHeaven.h"
 #include "GameData.h"
 #include "Score.h"
+#include "Countdown.h"
 
 const int SCREEN_WIDTH = 80;
 const int SCREEN_HEIGHT = 60;
@@ -26,6 +27,7 @@ public:
         m_output = new int[GetDiffScreenWidth() * GetDiffScreenHeight()];
         m_state = new int[GetDiffScreenWidth() * GetDiffScreenHeight()];
         score = new Score();
+        countdown = new Countdown(gamedata.GetTimelimit(), gamedata.GetTickRate());
 
         memset(m_output, 0, GetDiffScreenWidth() * GetDiffScreenHeight() * sizeof(int));
         memset(m_state, 0, GetDiffScreenWidth() * GetDiffScreenHeight() * sizeof(int));
@@ -43,6 +45,8 @@ public:
         CheckInputForGameState();
 
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        countdown->Decrement();
+
         bool isAnyCellOutsideSafeHeaven = false;
         bool isAnyCellAlive = false;
 
@@ -96,6 +100,15 @@ public:
             CreateSafeHeaven();
         }
 
+        if (countdown->Counter() == 0)
+        {
+            countdown->Reset();
+            score->UpdateHighScore();
+            score->ResetCurrentScore();
+            CreateSafeHeaven();
+            SetInitialData();
+        }
+
         return true;
     }
 
@@ -128,6 +141,7 @@ private:
     GameData gamedata;
     SafeHeaven* safeHeaven;
     Score* score;
+    Countdown* countdown;
     const int IS_ALIVE = 1;
 
     int* m_output;
@@ -288,9 +302,9 @@ private:
     {
         FillRect(
             GetDiffPos(GetDiffScreenWidth()-gamedata.GetNumberOfDabugArea()+1), 
-            GetDiffPos(46), 
+            GetDiffPos(45), 
             SCALE * (gamedata.GetNumberOfDabugArea()-2), 
-            SCALE * 10, 
+            SCALE * 14, 
             olc::BLACK);
 
         //Status
@@ -309,7 +323,7 @@ private:
         else if (gamedata.GetNumberNeighbourDistance().left == 0) direction = "E";
         else if (gamedata.GetNumberNeighbourDistance().right == 0) direction = "W";
 
-        DrawDebugText(1, 57, "Direction : " + direction);
+        DrawDebugText(1, 57, "Time : " + std::to_string(countdown->Counter()));
     }
 
     void DrawDebugText(int x, int y, std::string text)

@@ -9,6 +9,8 @@ private:
     int nNeighboursForMaximumDeath = 4;
     int nNeighboursForCreation = 3;
     int areaOfDebugWindow = 18;
+    int tickrate = 10;
+    int timelimit = 20;
 
 public:
     int GetNumberMinNeighbours()
@@ -27,6 +29,16 @@ public:
     int GetNumberOfDabugArea()
     {
         return areaOfDebugWindow;
+    }
+
+    int GetTickRate()
+    {
+        return tickrate;
+    }
+
+    int GetTimelimit()
+    {
+        return timelimit;
     }
 
     NeighboursData GetNumberNeighbourDistance()
