@@ -51,16 +51,6 @@ public:
         
         safeHeaven = new SafeHeaven(randomX, randomY, safeHeavenSize, safeHeavenSize, olc::GREEN);
     }
-
-    void SeedRandomIfFirstRun()
-    {
-        if (isFirstRun)
-        {
-            srand(time(NULL));
-            isFirstRun = false;
-        }
-    }
-
     bool OnUserUpdate(float fElapsedTime) override {
 
         CheckInputForGameState();
@@ -133,7 +123,6 @@ private:
     GameData gamedata;
     SafeHeaven* safeHeaven;
     const int IS_ALIVE = 1;
-    bool isFirstRun = true;
 
     int* m_output;
     int* m_state;
@@ -175,6 +164,7 @@ private:
         if (GetKey(olc::D).bHeld) gamedata.ChangeDirectionToRight();
         if (GetKey(olc::X).bHeld) gamedata.ChangeDirectionToDown();
 
+        // DEBUG
         if (GetKey(olc::K).bHeld) CreateSafeHeaven();
 
         if (GetKey(olc::SPACE).bHeld) SetInitialData();
