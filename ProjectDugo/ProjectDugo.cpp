@@ -193,8 +193,8 @@ public:
         int safeHeavenSize = SCALE * 32;
         int debugAreaOffset = gamedata.GetNumberOfDabugArea() * SCALE;
         int widthOffset = safeHeavenSize + debugAreaOffset;
-        int width = GetDiffScreenWidth() - widthOffset;
-        int height = GetDiffScreenHeight() - safeHeavenSize;
+        int width = ScreenWidth() - widthOffset;
+        int height = ScreenHeight() - safeHeavenSize;
         int randomX = rand() % width;
         int randomY = rand() % height;
         
