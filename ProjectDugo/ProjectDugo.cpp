@@ -16,6 +16,8 @@ public:
     {
         sAppName = "OLCJAM 2020 - GAME OF LIFE";
         lifeArea = _lifeArea;
+        srand(time(NULL));
+        randState = rand() % 100;
     }
 
     bool OnUserCreate() override {
@@ -37,15 +39,15 @@ public:
 
     void CreateSafeHeaven()
     {
-        SeedRandomIfFirstRun();
+        //SeedRandomIfFirstRun();
 
         int safeHeavenSize = SCALE * 32;
         int debugAreaOffset = gamedata.GetNumberOfDabugArea() * SCALE;
         int widthOffset = safeHeavenSize + debugAreaOffset;
         int width = ScreenWidth() - widthOffset;
         int height = ScreenHeight() - safeHeavenSize;
-        int randomX = rand() % width;
-        int randomY = rand() % height;
+        int randomX = Rand() % width;
+        int randomY = Rand() % height;
         
         safeHeaven = new SafeHeaven(randomX, randomY, safeHeavenSize, safeHeavenSize, olc::GREEN);
     }
@@ -136,6 +138,19 @@ private:
     int* m_output;
     int* m_state;
     int lifeArea;
+    uint32_t randState = 0;
+
+    // Lehmer’s random number generator
+    uint32_t Rand()
+    {
+        randState += 0xe120fc15;
+        uint64_t tmp;
+        tmp = (uint64_t)randState * 0x4a39b70d;
+        uint32_t m1 = (tmp >> 32) ^ tmp;
+        tmp = (uint64_t)m1 * 0x12fad5c9;
+        uint32_t m2 = (tmp >> 32) ^ tmp;
+        return m2;
+    }
 
 
     bool IsInLifeArea(int x, int y, int space)
@@ -159,6 +174,8 @@ private:
         if (GetKey(olc::A).bHeld) gamedata.ChangeDirectionToLeft();
         if (GetKey(olc::D).bHeld) gamedata.ChangeDirectionToRight();
         if (GetKey(olc::X).bHeld) gamedata.ChangeDirectionToDown();
+
+        if (GetKey(olc::K).bHeld) CreateSafeHeaven();
 
         if (GetKey(olc::SPACE).bHeld) SetInitialData();
     }
