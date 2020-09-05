@@ -7,7 +7,7 @@
 class MainMenuState : public GameState
 {
 public:
-    MainMenuState(ProjectDugo_Game* _game) :GameState(_game)
+    /*MainMenuState(ProjectDugo_Game* _game) :GameState(_game)
     {
 
     }
@@ -15,5 +15,5 @@ public:
     GameState* GoToNext() override
     {
         return new GameplayState(game);
-    }
+    }**/
 };

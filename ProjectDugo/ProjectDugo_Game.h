@@ -16,6 +16,7 @@ const int SCREEN_WIDTH = 80;
 const int SCREEN_HEIGHT = 60;
 const int SCALE = 8;
 
+enum class EnumGameState { MainMenu, Gameplay, GameOver};
 
 class ProjectDugo_Game : public olc::PixelGameEngine {
 public:
@@ -31,33 +32,140 @@ public:
         lifeArea = _lifeArea;
         srand(time(NULL));
         randState = rand() % 100;
+        gamestate = EnumGameState::MainMenu;
     }
 
     bool OnUserCreate() override {
+
+        MainMenuStateStart();
+
+        return true;
+    }
+    bool OnUserUpdate(float fElapsedTime) override {
+
+        switch (gamestate)
+        {
+        case EnumGameState::MainMenu:
+            MainMenuStateUpdate();
+            break;
+        case EnumGameState::Gameplay:
+            GameplayStateUpdate();
+            break;
+        case EnumGameState::GameOver:
+            GameoverStateUpdate();
+            break;
+        default:
+            break;
+        }
+
+        return true;
+    }
+
+    void CreateSafeHeaven()
+    {
+        //SeedRandomIfFirstRun();
+
+        int safeHeavenSize = SCALE * 32;
+        int debugAreaOffset = gamedata.GetNumberOfDabugArea() * SCALE;
+        int widthOffset = safeHeavenSize + debugAreaOffset;
+        int width = ScreenWidth() - widthOffset;
+        int height = ScreenHeight() - safeHeavenSize;
+        int randomX = Rand() % width;
+        int randomY = Rand() % height;
+
+        safeHeaven = new SafeHeaven(randomX, randomY, safeHeavenSize, safeHeavenSize, olc::GREEN);
+    }
+    void DrawSafeHeaven()
+    {
+        DrawRect(
+            safeHeaven->GetX(),
+            safeHeaven->GetY(),
+            safeHeaven->GetW(),
+            safeHeaven->GetH(),
+            safeHeaven->GetColor()
+        );
+    }
+
+private:
+    GameData gamedata;
+    SafeHeaven* safeHeaven;
+    Score* score;
+    Countdown* countdown;
+    const int IS_ALIVE = 1;
+    EnumGameState gamestate;
+
+
+    int* m_output;
+    int* m_state;
+    int lifeArea;
+    uint32_t randState = 0;
+
+    //GameStates
+
+    void ChangeState(EnumGameState newState)
+    {
+        switch (newState)
+        {
+        case EnumGameState::MainMenu:
+            MainMenuStateStart();
+            break;
+        case EnumGameState::Gameplay:
+            GameplayStateStart();
+            break;
+        case EnumGameState::GameOver:
+            GameoverStateStart();
+            break;
+        default:
+            break;
+        }
+
+        gamestate = newState;
+    }
+
+    void MainMenuStateStart()
+    {
+        DrawString(
+            GetDiffPos(1),
+            GetDiffPos(1),
+            "GAME OF LIFE", olc::WHITE);
+
+        DrawString(
+            GetDiffPos(1),
+            GetDiffPos(3),
+            "PRESS SPACE TO BEGIN", olc::WHITE);
+
+        DrawString(
+            GetDiffPos(1),
+            GetDiffPos(5),
+            "CONTAIN LIFE IN GREEN AREA", olc::WHITE);
+    }
+
+    void MainMenuStateUpdate()
+    {
+        if (GetKey(olc::SPACE).bPressed) ChangeState(EnumGameState::Gameplay);
+    }
+
+    void GameplayStateStart()
+    {
+        Clear(olc::BLACK);
 
         m_output = new int[GetDiffScreenWidth() * GetDiffScreenHeight()];
         m_state = new int[GetDiffScreenWidth() * GetDiffScreenHeight()];
         score = new Score();
         countdown = new Countdown(gamedata.GetTimelimit(), gamedata.GetTickRate());
-        stateController = new StateController(this);
 
         memset(m_output, 0, GetDiffScreenWidth() * GetDiffScreenHeight() * sizeof(int));
         memset(m_state, 0, GetDiffScreenWidth() * GetDiffScreenHeight() * sizeof(int));
-
-        stateController->Start();
 
         SetInitialData();
 
         CreateSafeHeaven();
         DrawDebugBorders();
         DrawGameTexts();
-
-        return true;
     }
-    bool OnUserUpdate(float fElapsedTime) override {
 
-        stateController->Update();
-
+    void GameplayStateUpdate()
+    {
         CheckInputForGameState();
 
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -120,52 +228,44 @@ public:
         {
             countdown->Reset();
             score->UpdateHighScore();
-            score->ResetCurrentScore();
             CreateSafeHeaven();
-            SetInitialData();
+
+            ChangeState(EnumGameState::GameOver);
         }
-
-        return true;
     }
 
-    void CreateSafeHeaven()
+
+    void GameoverStateStart()
     {
-        //SeedRandomIfFirstRun();
+        Clear(olc::BLACK);
 
-        int safeHeavenSize = SCALE * 32;
-        int debugAreaOffset = gamedata.GetNumberOfDabugArea() * SCALE;
-        int widthOffset = safeHeavenSize + debugAreaOffset;
-        int width = ScreenWidth() - widthOffset;
-        int height = ScreenHeight() - safeHeavenSize;
-        int randomX = Rand() % width;
-        int randomY = Rand() % height;
+        DrawString(
+            GetDiffPos(1),
+            GetDiffPos(1),
+            "GAME OVER", olc::WHITE);
 
-        safeHeaven = new SafeHeaven(randomX, randomY, safeHeavenSize, safeHeavenSize, olc::GREEN);
+        DrawString(
+            GetDiffPos(1),
+            GetDiffPos(3),
+            "PRESS SPACE TO TRY AGAIN", olc::WHITE);
+
+        DrawString(
+            GetDiffPos(1),
+            GetDiffPos(5),
+            "SCORE : " + std::to_string(score->CurrentScore()), olc::WHITE);
+
+        DrawString(
+            GetDiffPos(1),
+            GetDiffPos(7),
+            "HIGHSCORE : "+ std::to_string(score->Highscore()), olc::WHITE);
+
     }
-    void DrawSafeHeaven()
+
+    void GameoverStateUpdate()
     {
-        DrawRect(
-            safeHeaven->GetX(),
-            safeHeaven->GetY(),
-            safeHeaven->GetW(),
-            safeHeaven->GetH(),
-            safeHeaven->GetColor()
-        );
+        if (GetKey(olc::SPACE).bPressed) ChangeState(EnumGameState::Gameplay);
+
     }
-
-private:
-    GameData gamedata;
-    SafeHeaven* safeHeaven;
-    Score* score;
-    Countdown* countdown;
-    const int IS_ALIVE = 1;
-    StateController* stateController;
-
-
-    int* m_output;
-    int* m_state;
-    int lifeArea;
-    uint32_t randState = 0;
 
     // Lehmer’s random number generator
     uint32_t Rand()
@@ -210,6 +310,8 @@ private:
 
     void SetInitialData()
     {
+        score->ResetCurrentScore();
+
         for (int x = 1; x < GetDiffScreenWidth() - 1; x++)
             for (int y = 1; y < GetDiffScreenHeight() - 1; y++)
                 if (IsInLifeArea(x, y, lifeArea))
@@ -247,6 +349,12 @@ private:
             FillRect(0, GetDiffPos(y), SCALE, SCALE, olc::WHITE);
             FillRect(GetDiffPos(GetDiffScreenWidth() - gamedata.GetNumberOfDabugArea() - 1), GetDiffPos(y), SCALE, SCALE, olc::WHITE);
         }
+
+        //Titles
+        DrawString(
+            GetDiffPos(1),
+            GetDiffPos(0),
+            "Game Of Life", olc::BLACK);
     }
 
 
@@ -268,11 +376,6 @@ private:
     void DrawGameTexts()
     {
 
-        //Titles
-        DrawString(
-            GetDiffPos(1),
-            GetDiffPos(0),
-            "Game Of Life", olc::BLACK);
 
         DrawString(
             GetDiffPos(GetDiffScreenWidth() - gamedata.GetNumberOfDabugArea() + 4),
