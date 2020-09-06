@@ -21,11 +21,6 @@ enum class EnumGameState { MainMenu, Gameplay, GameOver};
 class ProjectDugo_Game : public olc::PixelGameEngine {
 public:
 
-    ProjectDugo_Game()
-    {
-
-    }
-
     ProjectDugo_Game(int _lifeArea)
     {
         sAppName = "OLCJAM 2020 - GAME OF LIFE";
@@ -104,6 +99,8 @@ private:
 
     void ChangeState(EnumGameState newState)
     {
+        Clear(olc::BLACK);
+
         switch (newState)
         {
         case EnumGameState::MainMenu:
@@ -124,20 +121,40 @@ private:
 
     void MainMenuStateStart()
     {
-        DrawString(
-            GetDiffPos(1),
-            GetDiffPos(1),
-            "GAME OF LIFE", olc::WHITE);
+        int initialInstructionsXPosition = 12;
 
         DrawString(
-            GetDiffPos(1),
-            GetDiffPos(3),
-            "PRESS SPACE TO BEGIN", olc::WHITE);
+            GetDiffPos(14),
+            GetDiffPos(10),
+            "Conway's Container", olc::WHITE, 3U);
 
         DrawString(
-            GetDiffPos(1),
-            GetDiffPos(5),
-            "CONTAIN LIFE IN GREEN AREA", olc::WHITE);
+            GetDiffPos(initialInstructionsXPosition),
+            GetDiffPos(18),
+            "> YOUR OBJECTIVE IS TO CONTAIN LIFE IN THE", olc::WHITE);
+
+
+        DrawString(
+            GetDiffPos(initialInstructionsXPosition+44),
+            GetDiffPos(18),
+            "GREEN SPACE", olc::GREEN);
+
+
+        DrawString(
+            GetDiffPos(initialInstructionsXPosition),
+            GetDiffPos(20),
+            "> YOU CAN MANIPULATE THE GAME RULES TO REACH YOUR DESTINY", olc::WHITE);
+
+        DrawString(
+            GetDiffPos(initialInstructionsXPosition),
+            GetDiffPos(22),
+            "> HAVE FUN!!", olc::WHITE);
+
+        
+        DrawString(
+            GetDiffPos(20),
+            GetDiffPos(GetDiffScreenHeight() - 8),
+            "PRESS SPACE TO BEGIN", olc::WHITE, 2U);
     }
 
     void MainMenuStateUpdate()
@@ -147,7 +164,6 @@ private:
 
     void GameplayStateStart()
     {
-        Clear(olc::BLACK);
 
         m_output = new int[GetDiffScreenWidth() * GetDiffScreenHeight()];
         m_state = new int[GetDiffScreenWidth() * GetDiffScreenHeight()];
@@ -237,8 +253,6 @@ private:
 
     void GameoverStateStart()
     {
-        Clear(olc::BLACK);
-
         DrawString(
             GetDiffPos(1),
             GetDiffPos(1),
