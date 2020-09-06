@@ -89,13 +89,14 @@ private:
     SafeHeaven* safeHeaven;
     Score* score;
     Countdown* countdown;
-    const int IS_ALIVE = 1;
     EnumGameState gamestate;
 
+    const int IS_ALIVE = 1;
 
     int* m_output;
     int* m_state;
     int lifeArea;
+    uint32_t gameTick = 0;
     uint32_t randState = 0;
 
     //GameStates
@@ -190,7 +191,15 @@ private:
     {
         CheckInputForGameState();
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
+        if (gameTick < 10)
+        {
+            gameTick++;
+            return;
+        }
+        gameTick = 0;
+
         countdown->Decrement();
 
         bool isAnyCellOutsideSafeHeaven = false;
