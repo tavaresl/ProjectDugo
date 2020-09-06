@@ -7,7 +7,7 @@
 class StateController
 {
 public:
-    StateController(ProjectDugo_Game* game)
+    /*StateController(ProjectDugo_Game* game)
     {
         currentState = new MainMenuState(game);
     }
@@ -24,8 +24,8 @@ public:
             currentState = currentState->GoToNext();
             currentState->Run();
         }
-    }
+    }*/
 
 private:
-    GameState* currentState;
+    //GameState* currentState;
 };

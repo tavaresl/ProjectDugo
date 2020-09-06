@@ -7,7 +7,7 @@
 class GameplayState : public GameState
 {
 public:
-    GameplayState(ProjectDugo_Game* _game):GameState(_game)
+    /*GameplayState(ProjectDugo_Game* _game):GameState(_game)
     {
 
     }
@@ -20,5 +20,5 @@ public:
     void Run() override
     {
 
-    }
+    }*/
 };

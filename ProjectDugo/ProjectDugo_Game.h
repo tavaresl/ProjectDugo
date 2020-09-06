@@ -16,14 +16,10 @@ const int SCREEN_WIDTH = 80;
 const int SCREEN_HEIGHT = 60;
 const int SCALE = 8;
 
+enum class EnumGameState { MainMenu, Gameplay, GameOver};
 
 class ProjectDugo_Game : public olc::PixelGameEngine {
 public:
-
-    ProjectDugo_Game()
-    {
-
-    }
 
     ProjectDugo_Game(int _lifeArea)
     {
@@ -31,33 +27,167 @@ public:
         lifeArea = _lifeArea;
         srand(time(NULL));
         randState = rand() % 100;
+        gamestate = EnumGameState::MainMenu;
+
+        score = new Score();
+        countdown = new Countdown(gamedata.GetTimelimit(), gamedata.GetTickRate());
     }
 
     bool OnUserCreate() override {
 
+        ChangeState(gamestate);
+
+        return true;
+    }
+    bool OnUserUpdate(float fElapsedTime) override {
+
+        switch (gamestate)
+        {
+        case EnumGameState::MainMenu:
+            MainMenuStateUpdate();
+            break;
+        case EnumGameState::Gameplay:
+            GameplayStateUpdate();
+            break;
+        case EnumGameState::GameOver:
+            GameoverStateUpdate();
+            break;
+        default:
+            break;
+        }
+
+        return true;
+    }
+
+    void CreateSafeHeaven()
+    {
+        //SeedRandomIfFirstRun();
+
+        int safeHeavenSize = SCALE * 32;
+        int debugAreaOffset = gamedata.GetNumberOfDabugArea() * SCALE;
+        int widthOffset = safeHeavenSize + debugAreaOffset;
+        int width = ScreenWidth() - widthOffset;
+        int height = ScreenHeight() - safeHeavenSize;
+        int randomX = Rand() % width;
+        int randomY = Rand() % height;
+
+        safeHeaven = new SafeHeaven(randomX, randomY, safeHeavenSize, safeHeavenSize, olc::GREEN);
+    }
+    void DrawSafeHeaven()
+    {
+        DrawRect(
+            safeHeaven->GetX(),
+            safeHeaven->GetY(),
+            safeHeaven->GetW(),
+            safeHeaven->GetH(),
+            safeHeaven->GetColor()
+        );
+    }
+
+private:
+    GameData gamedata;
+    SafeHeaven* safeHeaven;
+    Score* score;
+    Countdown* countdown;
+    const int IS_ALIVE = 1;
+    EnumGameState gamestate;
+
+
+    int* m_output;
+    int* m_state;
+    int lifeArea;
+    uint32_t randState = 0;
+
+    //GameStates
+
+    void ChangeState(EnumGameState newState)
+    {
+        Clear(olc::BLACK);
+
+        switch (newState)
+        {
+        case EnumGameState::MainMenu:
+            MainMenuStateStart();
+            break;
+        case EnumGameState::Gameplay:
+            GameplayStateStart();
+            break;
+        case EnumGameState::GameOver:
+            GameoverStateStart();
+            break;
+        default:
+            break;
+        }
+
+        gamestate = newState;
+    }
+
+    void MainMenuStateStart()
+    {
+        int initialInstructionsXPosition = 12;
+
+        DrawString(
+            GetDiffPos(14),
+            GetDiffPos(10),
+            "Conway's Container", olc::WHITE, 3U);
+
+        DrawString(
+            GetDiffPos(initialInstructionsXPosition),
+            GetDiffPos(18),
+            "> YOUR OBJECTIVE IS TO CONTAIN LIFE IN THE", olc::WHITE);
+
+
+        DrawString(
+            GetDiffPos(initialInstructionsXPosition+44),
+            GetDiffPos(18),
+            "GREEN SPACE", olc::GREEN);
+
+
+        DrawString(
+            GetDiffPos(initialInstructionsXPosition),
+            GetDiffPos(20),
+            "> YOU CAN MANIPULATE THE GAME RULES TO REACH YOUR GOAL", olc::WHITE);
+
+        DrawString(
+            GetDiffPos(initialInstructionsXPosition),
+            GetDiffPos(22),
+            "> HAVE FUN!!", olc::WHITE);
+
+        
+        DrawString(
+            GetDiffPos(20),
+            GetDiffPos(GetDiffScreenHeight() - 8),
+            "PRESS SPACE TO BEGIN", olc::WHITE, 2U);
+    }
+
+    void MainMenuStateUpdate()
+    {
+        if (GetKey(olc::SPACE).bPressed) ChangeState(EnumGameState::Gameplay);
+    }
+
+    void GameplayStateStart()
+    {
+
         m_output = new int[GetDiffScreenWidth() * GetDiffScreenHeight()];
         m_state = new int[GetDiffScreenWidth() * GetDiffScreenHeight()];
-        score = new Score();
-        countdown = new Countdown(gamedata.GetTimelimit(), gamedata.GetTickRate());
-        stateController = new StateController(this);
+
+        if (score == NULL) score = new Score();
+        //countdown = new Countdown(gamedata.GetTimelimit(), gamedata.GetTickRate());
 
         memset(m_output, 0, GetDiffScreenWidth() * GetDiffScreenHeight() * sizeof(int));
         memset(m_state, 0, GetDiffScreenWidth() * GetDiffScreenHeight() * sizeof(int));
 
-        stateController->Start();
+        score->ResetCurrentScore();
 
         SetInitialData();
 
         CreateSafeHeaven();
         DrawDebugBorders();
         DrawGameTexts();
-
-        return true;
     }
-    bool OnUserUpdate(float fElapsedTime) override {
 
-        stateController->Update();
-
+    void GameplayStateUpdate()
+    {
         CheckInputForGameState();
 
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -120,52 +250,46 @@ public:
         {
             countdown->Reset();
             score->UpdateHighScore();
-            score->ResetCurrentScore();
             CreateSafeHeaven();
-            SetInitialData();
+
+            ChangeState(EnumGameState::GameOver);
         }
-
-        return true;
     }
 
-    void CreateSafeHeaven()
+
+    void GameoverStateStart()
     {
-        //SeedRandomIfFirstRun();
+        int initialInstructionsXPosition = 22;
 
-        int safeHeavenSize = SCALE * 32;
-        int debugAreaOffset = gamedata.GetNumberOfDabugArea() * SCALE;
-        int widthOffset = safeHeavenSize + debugAreaOffset;
-        int width = ScreenWidth() - widthOffset;
-        int height = ScreenHeight() - safeHeavenSize;
-        int randomX = Rand() % width;
-        int randomY = Rand() % height;
+        DrawString(
+            GetDiffPos(26),
+            GetDiffPos(10),
+            "GAME OVER", olc::WHITE, 3U);
 
-        safeHeaven = new SafeHeaven(randomX, randomY, safeHeavenSize, safeHeavenSize, olc::GREEN);
+
+
+        DrawString(
+            GetDiffPos(initialInstructionsXPosition),
+            GetDiffPos(20),
+            "SCORE : " + std::to_string(score->CurrentScore()), olc::WHITE, 2U);
+
+        DrawString(
+            GetDiffPos(initialInstructionsXPosition),
+            GetDiffPos(26),
+            "HIGHSCORE : "+ std::to_string(score->Highscore()), olc::WHITE, 2U);
+
+
+        DrawString(
+            GetDiffPos(20),
+            GetDiffPos(GetDiffScreenHeight() - 8),
+            "PRESS SPACE TO BEGIN", olc::WHITE, 2U);
     }
-    void DrawSafeHeaven()
+
+    void GameoverStateUpdate()
     {
-        DrawRect(
-            safeHeaven->GetX(),
-            safeHeaven->GetY(),
-            safeHeaven->GetW(),
-            safeHeaven->GetH(),
-            safeHeaven->GetColor()
-        );
+        if (GetKey(olc::SPACE).bPressed) ChangeState(EnumGameState::Gameplay);
+
     }
-
-private:
-    GameData gamedata;
-    SafeHeaven* safeHeaven;
-    Score* score;
-    Countdown* countdown;
-    const int IS_ALIVE = 1;
-    StateController* stateController;
-
-
-    int* m_output;
-    int* m_state;
-    int lifeArea;
-    uint32_t randState = 0;
 
     // Lehmer’s random number generator
     uint32_t Rand()
@@ -191,21 +315,24 @@ private:
 
     void CheckInputForGameState()
     {
-        if (GetKey(olc::S).bHeld) gamedata.ChangeNumbersToOriginal();
-        if (GetKey(olc::Q).bHeld) gamedata.ChangeNumberNeighborToCreateLife();
-        if (GetKey(olc::E).bHeld) gamedata.ChangeNumberNeighborToMinimumDeath();
-        if (GetKey(olc::Z).bHeld) gamedata.ChangeNumberNeighborToMaximumDeath();
-        if (GetKey(olc::C).bHeld) gamedata.ChangeNumberNeighborDistance();
+        if (GetKey(olc::SPACE).bHeld) SetInitialData();
+
+        if (GetKey(olc::Q).bHeld) gamedata.ChangeNumberNeighborToMinimumDeath();
+        if (GetKey(olc::E).bHeld) gamedata.ChangeNumberNeighborToMaximumDeath();
+
+        if (GetKey(olc::J).bHeld) gamedata.ChangeNumberNeighborToCreateLife();
+        if (GetKey(olc::K).bHeld) gamedata.ChangeNumberNeighborDistance();
 
         if (GetKey(olc::W).bHeld) gamedata.ChangeDirectionToUp();
         if (GetKey(olc::A).bHeld) gamedata.ChangeDirectionToLeft();
         if (GetKey(olc::D).bHeld) gamedata.ChangeDirectionToRight();
-        if (GetKey(olc::X).bHeld) gamedata.ChangeDirectionToDown();
+        if (GetKey(olc::S).bHeld) gamedata.ChangeDirectionToDown();
+
+        if (GetKey(olc::BACK).bHeld) gamedata.ChangeNumbersToOriginal();
 
         // DEBUG
         if (GetKey(olc::K).bHeld) CreateSafeHeaven();
 
-        if (GetKey(olc::SPACE).bHeld) SetInitialData();
     }
 
     void SetInitialData()
@@ -247,6 +374,12 @@ private:
             FillRect(0, GetDiffPos(y), SCALE, SCALE, olc::WHITE);
             FillRect(GetDiffPos(GetDiffScreenWidth() - gamedata.GetNumberOfDabugArea() - 1), GetDiffPos(y), SCALE, SCALE, olc::WHITE);
         }
+
+        //Titles
+        DrawString(
+            GetDiffPos(1),
+            GetDiffPos(0),
+            "Game Of Life", olc::BLACK);
     }
 
 
@@ -268,11 +401,6 @@ private:
     void DrawGameTexts()
     {
 
-        //Titles
-        DrawString(
-            GetDiffPos(1),
-            GetDiffPos(0),
-            "Game Of Life", olc::BLACK);
 
         DrawString(
             GetDiffPos(GetDiffScreenWidth() - gamedata.GetNumberOfDabugArea() + 4),
@@ -283,35 +411,26 @@ private:
 
         DrawDebugText(2, 2, "> SPACE <");
         DrawDebugText(1, 3, "Create Life");
+        
+        DrawDebugText(2, 6, "> W A S D <");
+        DrawDebugText(1, 7, "Move Life");
 
-        DrawDebugText(2, 6, "> Q <");
-        DrawDebugText(1, 7, "Less Deaths");
-
-        DrawDebugText(2, 10, "> E <");
+        DrawDebugText(2, 10, "> Q <");
         DrawDebugText(1, 11, "Change Minimum");
         DrawDebugText(1, 12, "Neighbour Death");
 
-        DrawDebugText(2, 15, "> Z <");
+        DrawDebugText(2, 15, "> E <");
         DrawDebugText(1, 16, "Change Maximum");
         DrawDebugText(1, 17, "Neighbour Death");
 
-        DrawDebugText(2, 20, "> C <");
-        DrawDebugText(1, 21, "Change Distance");
+        DrawDebugText(2, 20, "> J <");
+        DrawDebugText(1, 21, "Less Deaths");
 
-        DrawDebugText(2, 24, "> W <");
-        DrawDebugText(1, 25, "Go Up");
+        DrawDebugText(2, 24, "> K <");
+        DrawDebugText(1, 25, "Change Distance");
 
-        DrawDebugText(2, 28, "> A <");
-        DrawDebugText(1, 29, "Go Left");
-
-        DrawDebugText(2, 32, "> D <");
-        DrawDebugText(1, 33, "Go Right");
-
-        DrawDebugText(2, 36, "> X <");
-        DrawDebugText(1, 37, "Go Down");
-
-        DrawDebugText(2, 40, "> S <");
-        DrawDebugText(1, 41, "Reset Stats");
+        DrawDebugText(2, 28, "> Backspace <");
+        DrawDebugText(1, 29, "Reset Rules");
 
 
     }
