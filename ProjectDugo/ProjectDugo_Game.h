@@ -74,7 +74,7 @@ public:
 
     void CreateSafeHeaven()
     {
-        int safeHeavenSize = SCALE * RandomHeavenSize(10, 32);
+        int safeHeavenSize = SCALE * RandomHeavenSize(16, 24); //SCALE * 32;
         int debugAreaOffset = gamedata.GetNumberOfDabugArea() * SCALE;
         int widthOffset = safeHeavenSize + debugAreaOffset;
         int width = ScreenWidth() - widthOffset;
@@ -179,17 +179,6 @@ private:
             GetDiffPos(20),
             GetDiffPos(GetDiffScreenHeight() - 8),
             "PRESS SPACE TO BEGIN", olc::WHITE, 2U);
-
-
-        DrawString(
-            GetDiffPos(1),
-            GetDiffPos(GetDiffScreenHeight() - 1),
-            "FALME STREAMLESS", olc::GREY);
-
-        DrawString(
-            GetDiffPos(GetDiffScreenWidth() - 14),
-            GetDiffPos(GetDiffScreenHeight() - 1),
-            "LUCAS TAVARES", olc::GREY);
     }
 
     void MainMenuStateUpdate()
@@ -336,7 +325,7 @@ private:
 
     }
 
-    // Lehmerï¿½s random number generator
+    // Lehmer’s random number generator
     uint32_t Rand()
     {
         randState += 0xe120fc15;
