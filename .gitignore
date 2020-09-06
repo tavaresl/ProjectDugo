@@ -1,6 +1,8 @@
 .vs/
 .idea/
 Debug/
+Release/
 x64/
 ./ProjectDugo/Debug
+./ProjectDugo/Release
 ./ProjectDugo/x64
