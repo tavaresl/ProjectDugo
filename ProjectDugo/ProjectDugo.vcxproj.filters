@@ -29,5 +29,11 @@
     <Media Include="beep-22.wav">
       <Filter>Resource Files</Filter>
     </Media>
+    <Media Include="gameover.wav">
+      <Filter>Resource Files</Filter>
+    </Media>
+    <Media Include="gamestart.wav">
+      <Filter>Resource Files</Filter>
+    </Media>
   </ItemGroup>
 </Project>

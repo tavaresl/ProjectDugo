@@ -40,6 +40,8 @@ public:
         bgMusicSample = olc::SOUND::LoadAudioSample("bg.wav");
         tickBeepSample = olc::SOUND::LoadAudioSample("beep-29.wav");
         pointBeepSample = olc::SOUND::LoadAudioSample("beep-22.wav");
+        gamestartSample = olc::SOUND::LoadAudioSample("gamestart.wav");
+        gameoverSample = olc::SOUND::LoadAudioSample("gameover.wav");
         ChangeState(gamestate);
 
         return true;
@@ -105,6 +107,8 @@ private:
     int bgMusicSample;
     int pointBeepSample;
     int tickBeepSample;
+    int gamestartSample;
+    int gameoverSample;
     bool tickBeeped;
 
 
@@ -207,6 +211,7 @@ private:
 
         score->ResetCurrentScore();
 
+        olc::SOUND::PlaySample(gamestartSample);
         SetInitialData();
 
         CreateSafeHeaven();
@@ -299,6 +304,7 @@ private:
     void GameoverStateStart()
     {
         int initialInstructionsXPosition = 22;
+        olc::SOUND::PlaySample(gameoverSample);
 
         DrawString(
             GetDiffPos(26),
@@ -330,7 +336,7 @@ private:
 
     }
 
-    // Lehmer’s random number generator
+    // Lehmerï¿½s random number generator
     uint32_t Rand()
     {
         randState += 0xe120fc15;

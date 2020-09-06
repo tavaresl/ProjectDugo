@@ -145,6 +145,8 @@
     <Media Include="beep-22.wav" />
     <Media Include="beep-29.wav" />
     <Media Include="bg.wav" />
+    <Media Include="gameover.wav" />
+    <Media Include="gamestart.wav" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
