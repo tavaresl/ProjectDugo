@@ -1,9 +1,0 @@
-﻿  ProjectDugo.cpp
-C:\Users\Fanatee\source\repos\ProjectDugo\ProjectDugo\olcConsoleGameEngine.h(767,1): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\Fanatee\source\repos\ProjectDugo\ProjectDugo\olcConsoleGameEngine.h(1107,1): warning C4267: 'return': conversion from 'size_t' to 'unsigned int', possible loss of data
-C:\Users\Fanatee\source\repos\ProjectDugo\ProjectDugo\olcConsoleGameEngine.h(1204,1): warning C4312: 'type cast': conversion from 'DWORD' to 'olcConsoleGameEngine *' of greater size
-  Generating code
-  Previous IPDB not found, fall back to full compilation.
-  All 261 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
-  Finished generating code
-  ProjectDugo.vcxproj -> C:\Users\Fanatee\source\repos\ProjectDugo\x64\Release\ProjectDugo.exe
