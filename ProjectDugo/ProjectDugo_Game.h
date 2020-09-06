@@ -24,7 +24,7 @@ public:
 
     ProjectDugo_Game(int _lifeArea)
     {
-        sAppName = "OLCJAM 2020 - GAME OF LIFE";
+        sAppName = "Conway's Container";
         lifeArea = _lifeArea;
         srand(time(NULL));
         randState = rand() % 100;
