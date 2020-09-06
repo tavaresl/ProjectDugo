@@ -410,27 +410,27 @@ private:
         //Commands
 
         DrawDebugText(2, 2, "> SPACE <");
-        DrawDebugText(1, 3, "Create Life");
+        DrawDebugText(1, 4, "Create Life");
         
-        DrawDebugText(2, 6, "> W A S D <");
-        DrawDebugText(1, 7, "Move Life");
+        DrawDebugText(2, 7, "> W A S D <");
+        DrawDebugText(1, 9, "Move Life");
 
-        DrawDebugText(2, 10, "> Q <");
-        DrawDebugText(1, 11, "Change Minimum");
-        DrawDebugText(1, 12, "Neighbour Death");
+        DrawDebugText(2, 13, "> Q <");
+        DrawDebugText(1, 15, "Change Minimum");
+        DrawDebugText(1, 16, "Neighbour Death");
 
-        DrawDebugText(2, 15, "> E <");
-        DrawDebugText(1, 16, "Change Maximum");
-        DrawDebugText(1, 17, "Neighbour Death");
+        DrawDebugText(2, 20, "> E <");
+        DrawDebugText(1, 22, "Change Maximum");
+        DrawDebugText(1, 23, "Neighbour Death");
 
-        DrawDebugText(2, 20, "> J <");
-        DrawDebugText(1, 21, "Less Deaths");
+        DrawDebugText(2, 27, "> J <");
+        DrawDebugText(1, 29, "Less Deaths");
 
-        DrawDebugText(2, 24, "> K <");
-        DrawDebugText(1, 25, "Change Distance");
+        DrawDebugText(2, 33, "> K <");
+        DrawDebugText(1, 35, "Change Distance");
 
-        DrawDebugText(2, 28, "> Backspace <");
-        DrawDebugText(1, 29, "Reset Rules");
+        DrawDebugText(2, 39, "> Backspace <");
+        DrawDebugText(1, 41, "Reset Rules");
 
 
     }
