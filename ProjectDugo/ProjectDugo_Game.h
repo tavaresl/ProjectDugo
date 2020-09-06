@@ -74,7 +74,7 @@ public:
 
     void CreateSafeHeaven()
     {
-        int safeHeavenSize = SCALE * RandomHeavenSize(10, 32); //SCALE * 32;
+        int safeHeavenSize = SCALE * RandomHeavenSize(16, 24); //SCALE * 32;
         int debugAreaOffset = gamedata.GetNumberOfDabugArea() * SCALE;
         int widthOffset = safeHeavenSize + debugAreaOffset;
         int width = ScreenWidth() - widthOffset;
