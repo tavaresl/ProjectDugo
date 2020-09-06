@@ -179,6 +179,16 @@ private:
             GetDiffPos(20),
             GetDiffPos(GetDiffScreenHeight() - 8),
             "PRESS SPACE TO BEGIN", olc::WHITE, 2U);
+
+        DrawString(
+            GetDiffPos(1),
+            GetDiffPos(GetDiffScreenHeight() - 1),
+            "FALME STREAMLESS", olc::GREY);
+
+        DrawString(
+            GetDiffPos(GetDiffScreenWidth() - 14),
+            GetDiffPos(GetDiffScreenHeight() - 1),
+            "LUCAS TAVARES", olc::GREY);
     }
 
     void MainMenuStateUpdate()
