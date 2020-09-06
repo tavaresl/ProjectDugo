@@ -365,7 +365,7 @@ private:
         if (GetKey(olc::BACK).bHeld) gamedata.ChangeNumbersToOriginal();
 
         // DEBUG
-        if (GetKey(olc::K).bHeld) CreateSafeHeaven();
+        //if (GetKey(olc::K).bHeld) CreateSafeHeaven();
 
     }
 

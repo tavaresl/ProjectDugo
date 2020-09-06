@@ -10,7 +10,7 @@ private:
     int nNeighboursForCreation = 3;
     int areaOfDebugWindow = 18;
     int tickrate = 10;
-    int timelimit = 20;
+    int timelimit = 30;
 
 public:
     int GetNumberMinNeighbours()
