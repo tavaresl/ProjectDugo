@@ -340,7 +340,7 @@ private:
 
     bool IsInLifeArea(int x, int y, int space)
     {
-        int screenMiddleX = (GetDiffScreenWidth() / 2);
+        int screenMiddleX = ((GetDiffScreenWidth() - gamedata.GetNumberOfDabugArea()) / 2);
         int screenMiddleY = (GetDiffScreenHeight() / 2);
         return
             (x > screenMiddleX - space && x < screenMiddleX + space &&
