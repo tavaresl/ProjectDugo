@@ -63,7 +63,7 @@ public:
     {
         //SeedRandomIfFirstRun();
 
-        int safeHeavenSize = SCALE * 32;
+        int safeHeavenSize = SCALE * RandomHeavenSize(10, 32); //SCALE * 32;
         int debugAreaOffset = gamedata.GetNumberOfDabugArea() * SCALE;
         int widthOffset = safeHeavenSize + debugAreaOffset;
         int width = ScreenWidth() - widthOffset;
@@ -484,5 +484,10 @@ private:
     int GetDiffPos(int a)
     {
         return a * SCALE;
+    }
+
+    int RandomHeavenSize(int min, int max)
+    {
+        return Rand() % max + min;
     }
 };
