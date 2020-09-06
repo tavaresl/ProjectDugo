@@ -1,5 +1,6 @@
 #pragma once
 
+
 class Countdown
 {
 private:
@@ -7,6 +8,7 @@ private:
 	unsigned int tickrate;
 	unsigned int counter;
 	unsigned int tick;
+	unsigned int beepInterval;
 
 public:
 	Countdown(unsigned int _timelimit, unsigned int _tickrate) {

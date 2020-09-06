@@ -5,12 +5,13 @@
 #include <time.h>
 #define OLC_PGE_APPLICATION
 #include "olcConsoleGameEngine.h"
+#define OLC_PGEX_SOUND
+#include "olcPGEX_Sound.h"
 #include "SafeHeaven.h"
 #include "GameData.h"
 #include "Score.h"
 #include "Countdown.h"
 #include "StateController.h"
-
 
 const int SCREEN_WIDTH = 80;
 const int SCREEN_HEIGHT = 60;
@@ -33,8 +34,12 @@ public:
         countdown = new Countdown(gamedata.GetTimelimit(), gamedata.GetTickRate());
     }
 
-    bool OnUserCreate() override {
-
+    bool OnUserCreate() override
+    {
+        olc::SOUND::InitialiseAudio();
+        bgMusicSample = olc::SOUND::LoadAudioSample("bg.wav");
+        tickBeepSample = olc::SOUND::LoadAudioSample("beep-29.wav");
+        pointBeepSample = olc::SOUND::LoadAudioSample("beep-22.wav");
         ChangeState(gamestate);
 
         return true;
@@ -56,6 +61,12 @@ public:
             break;
         }
 
+        return true;
+    }
+    
+    bool OnUserDestroy() override
+    {
+        olc::SOUND::DestroyAudio();
         return true;
     }
 
@@ -88,8 +99,14 @@ private:
     Score* score;
     Countdown* countdown;
     EnumGameState gamestate;
-
     const int IS_ALIVE = 1;
+
+    const int beepInterval = 10;
+    int bgMusicSample;
+    int pointBeepSample;
+    int tickBeepSample;
+    bool tickBeeped;
+
 
     int* m_output;
     int* m_state;
@@ -124,6 +141,7 @@ private:
     void MainMenuStateStart()
     {
         int initialInstructionsXPosition = 12;
+        olc::SOUND::PlaySample(bgMusicSample, true);
 
         DrawString(
             GetDiffPos(14),
@@ -200,14 +218,7 @@ private:
     {
         CheckInputForGameState();
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
-
-        if (gameTick < 10)
-        {
-            gameTick++;
-            return;
-        }
-        gameTick = 0;
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
         countdown->Decrement();
 
@@ -259,6 +270,7 @@ private:
 
         if (isAnyCellAlive && !isAnyCellOutsideSafeHeaven)
         {
+            olc::SOUND::PlaySample(pointBeepSample);
             score->IncrementCurrentScore();
             score->UpdateHighScore();
             CreateSafeHeaven();
@@ -271,6 +283,15 @@ private:
             CreateSafeHeaven();
 
             ChangeState(EnumGameState::GameOver);
+        }
+
+        if (countdown->Counter() % beepInterval != 0)
+            tickBeeped = false;
+
+        if (!tickBeeped && countdown->Counter() != gamedata.GetTimelimit() && countdown->Counter() % beepInterval == 0)
+        {
+            olc::SOUND::PlaySample(tickBeepSample, false);
+            tickBeeped = true;
         }
     }
 
