@@ -28,11 +28,14 @@ public:
         srand(time(NULL));
         randState = rand() % 100;
         gamestate = EnumGameState::MainMenu;
+
+        score = new Score();
+        countdown = new Countdown(gamedata.GetTimelimit(), gamedata.GetTickRate());
     }
 
     bool OnUserCreate() override {
 
-        MainMenuStateStart();
+        ChangeState(gamestate);
 
         return true;
     }
@@ -143,7 +146,7 @@ private:
         DrawString(
             GetDiffPos(initialInstructionsXPosition),
             GetDiffPos(20),
-            "> YOU CAN MANIPULATE THE GAME RULES TO REACH YOUR DESTINY", olc::WHITE);
+            "> YOU CAN MANIPULATE THE GAME RULES TO REACH YOUR GOAL", olc::WHITE);
 
         DrawString(
             GetDiffPos(initialInstructionsXPosition),
@@ -167,11 +170,14 @@ private:
 
         m_output = new int[GetDiffScreenWidth() * GetDiffScreenHeight()];
         m_state = new int[GetDiffScreenWidth() * GetDiffScreenHeight()];
-        score = new Score();
-        countdown = new Countdown(gamedata.GetTimelimit(), gamedata.GetTickRate());
+
+        if (score == NULL) score = new Score();
+        //countdown = new Countdown(gamedata.GetTimelimit(), gamedata.GetTickRate());
 
         memset(m_output, 0, GetDiffScreenWidth() * GetDiffScreenHeight() * sizeof(int));
         memset(m_state, 0, GetDiffScreenWidth() * GetDiffScreenHeight() * sizeof(int));
+
+        score->ResetCurrentScore();
 
         SetInitialData();
 
@@ -253,26 +259,30 @@ private:
 
     void GameoverStateStart()
     {
-        DrawString(
-            GetDiffPos(1),
-            GetDiffPos(1),
-            "GAME OVER", olc::WHITE);
+        int initialInstructionsXPosition = 22;
 
         DrawString(
-            GetDiffPos(1),
-            GetDiffPos(3),
-            "PRESS SPACE TO TRY AGAIN", olc::WHITE);
+            GetDiffPos(26),
+            GetDiffPos(10),
+            "GAME OVER", olc::WHITE, 3U);
+
+
 
         DrawString(
-            GetDiffPos(1),
-            GetDiffPos(5),
-            "SCORE : " + std::to_string(score->CurrentScore()), olc::WHITE);
+            GetDiffPos(initialInstructionsXPosition),
+            GetDiffPos(20),
+            "SCORE : " + std::to_string(score->CurrentScore()), olc::WHITE, 2U);
 
         DrawString(
-            GetDiffPos(1),
-            GetDiffPos(7),
-            "HIGHSCORE : "+ std::to_string(score->Highscore()), olc::WHITE);
+            GetDiffPos(initialInstructionsXPosition),
+            GetDiffPos(26),
+            "HIGHSCORE : "+ std::to_string(score->Highscore()), olc::WHITE, 2U);
 
+
+        DrawString(
+            GetDiffPos(20),
+            GetDiffPos(GetDiffScreenHeight() - 8),
+            "PRESS SPACE TO BEGIN", olc::WHITE, 2U);
     }
 
     void GameoverStateUpdate()
@@ -305,27 +315,28 @@ private:
 
     void CheckInputForGameState()
     {
-        if (GetKey(olc::S).bHeld) gamedata.ChangeNumbersToOriginal();
-        if (GetKey(olc::Q).bHeld) gamedata.ChangeNumberNeighborToCreateLife();
-        if (GetKey(olc::E).bHeld) gamedata.ChangeNumberNeighborToMinimumDeath();
-        if (GetKey(olc::Z).bHeld) gamedata.ChangeNumberNeighborToMaximumDeath();
-        if (GetKey(olc::C).bHeld) gamedata.ChangeNumberNeighborDistance();
+        if (GetKey(olc::SPACE).bHeld) SetInitialData();
+
+        if (GetKey(olc::Q).bHeld) gamedata.ChangeNumberNeighborToMinimumDeath();
+        if (GetKey(olc::E).bHeld) gamedata.ChangeNumberNeighborToMaximumDeath();
+
+        if (GetKey(olc::J).bHeld) gamedata.ChangeNumberNeighborToCreateLife();
+        if (GetKey(olc::K).bHeld) gamedata.ChangeNumberNeighborDistance();
 
         if (GetKey(olc::W).bHeld) gamedata.ChangeDirectionToUp();
         if (GetKey(olc::A).bHeld) gamedata.ChangeDirectionToLeft();
         if (GetKey(olc::D).bHeld) gamedata.ChangeDirectionToRight();
-        if (GetKey(olc::X).bHeld) gamedata.ChangeDirectionToDown();
+        if (GetKey(olc::S).bHeld) gamedata.ChangeDirectionToDown();
+
+        if (GetKey(olc::BACK).bHeld) gamedata.ChangeNumbersToOriginal();
 
         // DEBUG
         if (GetKey(olc::K).bHeld) CreateSafeHeaven();
 
-        if (GetKey(olc::SPACE).bHeld) SetInitialData();
     }
 
     void SetInitialData()
     {
-        score->ResetCurrentScore();
-
         for (int x = 1; x < GetDiffScreenWidth() - 1; x++)
             for (int y = 1; y < GetDiffScreenHeight() - 1; y++)
                 if (IsInLifeArea(x, y, lifeArea))
@@ -400,35 +411,26 @@ private:
 
         DrawDebugText(2, 2, "> SPACE <");
         DrawDebugText(1, 3, "Create Life");
+        
+        DrawDebugText(2, 6, "> W A S D <");
+        DrawDebugText(1, 7, "Move Life");
 
-        DrawDebugText(2, 6, "> Q <");
-        DrawDebugText(1, 7, "Less Deaths");
-
-        DrawDebugText(2, 10, "> E <");
+        DrawDebugText(2, 10, "> Q <");
         DrawDebugText(1, 11, "Change Minimum");
         DrawDebugText(1, 12, "Neighbour Death");
 
-        DrawDebugText(2, 15, "> Z <");
+        DrawDebugText(2, 15, "> E <");
         DrawDebugText(1, 16, "Change Maximum");
         DrawDebugText(1, 17, "Neighbour Death");
 
-        DrawDebugText(2, 20, "> C <");
-        DrawDebugText(1, 21, "Change Distance");
+        DrawDebugText(2, 20, "> J <");
+        DrawDebugText(1, 21, "Less Deaths");
 
-        DrawDebugText(2, 24, "> W <");
-        DrawDebugText(1, 25, "Go Up");
+        DrawDebugText(2, 24, "> K <");
+        DrawDebugText(1, 25, "Change Distance");
 
-        DrawDebugText(2, 28, "> A <");
-        DrawDebugText(1, 29, "Go Left");
-
-        DrawDebugText(2, 32, "> D <");
-        DrawDebugText(1, 33, "Go Right");
-
-        DrawDebugText(2, 36, "> X <");
-        DrawDebugText(1, 37, "Go Down");
-
-        DrawDebugText(2, 40, "> S <");
-        DrawDebugText(1, 41, "Reset Stats");
+        DrawDebugText(2, 28, "> Backspace <");
+        DrawDebugText(1, 29, "Reset Rules");
 
 
     }
